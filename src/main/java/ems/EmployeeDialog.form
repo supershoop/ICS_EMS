@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="ems.EmployeeDialog">
+  <grid id="cbd77" binding="contentPane" layout-manager="GridBagLayout">
+    <constraints>
+      <xy x="48" y="54" width="542" height="551"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="ed69" layout-manager="GridBagLayout">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="1.0"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="2f981" binding="details" layout-manager="GridBagLayout">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+              <gridbag top="5" left="10" bottom="5" right="10" weightx="1.0" weighty="0.0"/>
+            </constraints>
+            <properties/>
+            <border type="none" title="Basic Details"/>
+            <children>
+              <component id="7a80" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="10"/>
+                  <horizontalTextPosition value="11"/>
+                  <text value="First Name:"/>
+                </properties>
+              </component>
+              <component id="f4c58" class="javax.swing.JTextField" binding="fNameField">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="c0b4b" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="10"/>
+                  <horizontalTextPosition value="11"/>
+                  <text value="Last Name:"/>
+                </properties>
+              </component>
+              <component id="5a15" class="javax.swing.JTextField" binding="lNameField">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="9eeb5" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="10"/>
+                  <horizontalTextPosition value="11"/>
+                  <text value="Type:"/>
+                </properties>
+              </component>
+              <component id="8a413" class="javax.swing.JRadioButton" binding="fullTimeRadioButton">
+                <constraints>
+                  <grid row="8" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="Full Time"/>
+                </properties>
+              </component>
+              <component id="af0dc" class="javax.swing.JRadioButton" binding="partTimeRadioButton" default-binding="true">
+                <constraints>
+                  <grid row="9" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="Part Time"/>
+                </properties>
+              </component>
+              <component id="70975" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="10"/>
+                  <horizontalTextPosition value="11"/>
+                  <text value="Employee Number:"/>
+                </properties>
+              </component>
+              <component id="e4602" class="javax.swing.JTextField" binding="employeeNumberField">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="e893c" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="10"/>
+                  <horizontalTextPosition value="11"/>
+                  <text value="Gender:"/>
+                </properties>
+              </component>
+              <component id="5fe9a" class="javax.swing.JRadioButton" binding="femaleGenderOption">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="Female"/>
+                </properties>
+              </component>
+              <component id="30f38" class="javax.swing.JRadioButton" binding="otherGenderOption">
+                <constraints>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="Other"/>
+                </properties>
+              </component>
+              <component id="ee4a7" class="javax.swing.JRadioButton" binding="preferNotToSayGenderOption">
+                <constraints>
+                  <grid row="6" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="Prefer not to say"/>
+                </properties>
+              </component>
+              <component id="4d7a8" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="10"/>
+                  <horizontalTextPosition value="11"/>
+                  <text value="Work Location"/>
+                </properties>
+              </component>
+              <component id="cb501" class="javax.swing.JComboBox" binding="workLocationBox">
+                <constraints>
+                  <grid row="7" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <model/>
+                </properties>
+              </component>
+              <component id="bfbe2" class="javax.swing.JRadioButton" binding="maleGenderOption">
+                <constraints>
+                  <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="Male"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="3668f" binding="incomeDetails" layout-manager="CardLayout" hgap="0" vgap="0">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+              <gridbag top="5" left="10" bottom="5" right="10" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="6fb55" layout-manager="GridBagLayout">
+                <constraints>
+                  <card name="FTE"/>
+                </constraints>
+                <properties/>
+                <border type="none" title="Full Time Employee"/>
+                <children>
+                  <component id="b101a" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <horizontalAlignment value="10"/>
+                      <horizontalTextPosition value="11"/>
+                      <text value="Salary:"/>
+                    </properties>
+                  </component>
+                  <component id="3d426" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <text value="$"/>
+                    </properties>
+                  </component>
+                  <component id="716db" class="javax.swing.JSpinner" binding="salaryField">
+                    <constraints>
+                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                    </constraints>
+                    <properties/>
+                  </component>
+                  <component id="a1819" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <horizontalAlignment value="10"/>
+                      <horizontalTextPosition value="11"/>
+                      <text value="Deduction Rate:"/>
+                    </properties>
+                  </component>
+                  <component id="aaf8b" class="javax.swing.JSpinner" binding="deductionRateFTE">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                    </constraints>
+                    <properties/>
+                  </component>
+                  <component id="afd2" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <text value="%"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="18e01" layout-manager="GridBagLayout">
+                <constraints>
+                  <card name="PTE"/>
+                </constraints>
+                <properties/>
+                <border type="none" title="Part Time Employee"/>
+                <children>
+                  <component id="20c13" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <horizontalAlignment value="10"/>
+                      <horizontalTextPosition value="11"/>
+                      <text value="Hourly Wage:"/>
+                    </properties>
+                  </component>
+                  <component id="326d6" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <horizontalAlignment value="10"/>
+                      <horizontalTextPosition value="11"/>
+                      <text value="Hours per Week:"/>
+                    </properties>
+                  </component>
+                  <component id="991d5" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <horizontalAlignment value="10"/>
+                      <horizontalTextPosition value="11"/>
+                      <text value="Weeks Per Year:"/>
+                    </properties>
+                  </component>
+                  <component id="69bf2" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <text value="$"/>
+                    </properties>
+                  </component>
+                  <component id="c5150" class="javax.swing.JSpinner" binding="hourlyWageField">
+                    <constraints>
+                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                    </constraints>
+                    <properties/>
+                  </component>
+                  <component id="a9c9" class="javax.swing.JSpinner" binding="hoursPerWeekField">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                    </constraints>
+                    <properties/>
+                  </component>
+                  <component id="f565b" class="javax.swing.JSpinner" binding="weeksPerYearField">
+                    <constraints>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                    </constraints>
+                    <properties/>
+                  </component>
+                  <component id="c7aa8" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <horizontalAlignment value="10"/>
+                      <horizontalTextPosition value="11"/>
+                      <text value="Deduction Rate:"/>
+                    </properties>
+                  </component>
+                  <component id="5280" class="javax.swing.JSpinner" binding="deductionRatePTE">
+                    <constraints>
+                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="0.0"/>
+                    </constraints>
+                    <properties/>
+                  </component>
+                  <component id="57369" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <text value="%"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <component id="6a374" class="javax.swing.JLabel" binding="errorMessageLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <text value="Label"/>
+        </properties>
+      </component>
+      <grid id="a7b57" layout-manager="FlowLayout" hgap="10" vgap="5" flow-align="2">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="0.0"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="d9ae" class="javax.swing.JButton" binding="buttonCancel">
+            <constraints/>
+            <properties>
+              <text value="Cancel"/>
+            </properties>
+          </component>
+          <component id="4fc8" class="javax.swing.JButton" binding="buttonAdd">
+            <constraints/>
+            <properties>
+              <text value="Add"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+  <buttonGroups>
+    <group name="employeeType">
+      <member id="8f962"/>
+      <member id="cc85"/>
+      <member id="8a413"/>
+      <member id="af0dc"/>
+    </group>
+    <group name="gender">
+      <member id="5fe9a"/>
+      <member id="5fe9a"/>
+      <member id="bfbe2"/>
+      <member id="30f38"/>
+      <member id="ee4a7"/>
+    </group>
+  </buttonGroups>
+</form>
