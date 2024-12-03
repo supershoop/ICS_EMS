@@ -1,4 +1,4 @@
-package ems;
+package owenwang.ems;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -7,11 +7,13 @@ import java.awt.event.*;
 import java.util.Optional;
 
 public class EmployeeDialog extends JDialog {
-    private int employee; // Create new if -1, else modify existing
+    private final int employee; // Create new if -1, else modify existing
     private int newEmployee = -1; // The id of the newly-created employee, or the id to move an existing employee to
+    // if editing an employee, employee will contain the old id while newEmployee will contain the new one
+
     private JPanel contentPane;
-    private JButton buttonAdd;
-    private JButton buttonCancel;
+    private JButton submitButton;
+    private JButton cancelButton;
     private JPanel details;
     private JTextField fNameField;
     private JTextField lNameField;
@@ -35,6 +37,7 @@ public class EmployeeDialog extends JDialog {
     public static class EmployeeModification {
         public int oldNumber;
         public int newNumber;
+        public boolean wasChanged;
     }
 
     private final MyHashTable data;
@@ -50,29 +53,31 @@ public class EmployeeDialog extends JDialog {
         d.setVisible(true);
         var modification = new EmployeeModification();
         modification.oldNumber = d.employee;
-        modification.newNumber = d.newEmployee;
+        modification.newNumber = d.newEmployee == -1 ? d.employee : d.newEmployee;
+        modification.wasChanged = d.newEmployee != -1;
         return modification;
     }
 
     private EmployeeDialog(MyHashTable data, int employee) {
         this.data = data;
         this.employee = employee;
+        setTitle(this.employee == -1 ? "New Employee" : "Edit Employee");
         $$$setupUI$$$();
         setContentPane(contentPane);
         setModal(true);
-        getRootPane().setDefaultButton(buttonAdd);
+        getRootPane().setDefaultButton(submitButton);
         setMinimumSize(getRootPane().getMinimumSize());
         setResizable(false);
         pack();
         setSize(400, getHeight());
 
-        buttonAdd.addActionListener(new ActionListener() {
+        submitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();
             }
         });
 
-        buttonCancel.addActionListener(new ActionListener() {
+        cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
             }
@@ -171,6 +176,10 @@ public class EmployeeDialog extends JDialog {
                     break;
             }
         }
+        if (e != null) {
+            deductionRateFTE.setValue(e.getDeductRate() * 100d);
+            deductionRatePTE.setValue(e.getDeductRate() * 100d);
+        }
         if (e instanceof FTE) {
             fullTimeRadioButton.setSelected(true);
             onFTESelected();
@@ -182,6 +191,7 @@ public class EmployeeDialog extends JDialog {
             hoursPerWeekField.setValue(((PTE) e).getHoursPerWeek());
             weeksPerYearField.setValue(((PTE) e).getWeeksPerYear());
         }
+        submitButton.setText(employee == -1 ? "Add" : "Save");
     }
 
     private EmployeeInfo createEmployee(int employeeNumber) {
@@ -311,7 +321,7 @@ public class EmployeeDialog extends JDialog {
         details.add(label3, gbc);
         fullTimeRadioButton = new JRadioButton();
         fullTimeRadioButton.setSelected(true);
-        fullTimeRadioButton.setText("Full Time");
+        fullTimeRadioButton.setText("Full-time");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 8;
@@ -320,7 +330,7 @@ public class EmployeeDialog extends JDialog {
         gbc.insets = new Insets(0, 0, 0, 10);
         details.add(fullTimeRadioButton, gbc);
         partTimeRadioButton = new JRadioButton();
-        partTimeRadioButton.setText("Part Time");
+        partTimeRadioButton.setText("Part-time");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 9;
@@ -428,7 +438,7 @@ public class EmployeeDialog extends JDialog {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridBagLayout());
         incomeDetails.add(panel2, "FTE");
-        panel2.setBorder(BorderFactory.createTitledBorder(null, "Full Time Employee", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        panel2.setBorder(BorderFactory.createTitledBorder(null, "Full-Time Employee", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JLabel label7 = new JLabel();
         label7.setHorizontalAlignment(10);
         label7.setHorizontalTextPosition(11);
@@ -484,7 +494,7 @@ public class EmployeeDialog extends JDialog {
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridBagLayout());
         incomeDetails.add(panel3, "PTE");
-        panel3.setBorder(BorderFactory.createTitledBorder(null, "Part Time Employee", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        panel3.setBorder(BorderFactory.createTitledBorder(null, "Part-Time Employee", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JLabel label11 = new JLabel();
         label11.setHorizontalAlignment(10);
         label11.setHorizontalTextPosition(11);
@@ -592,12 +602,12 @@ public class EmployeeDialog extends JDialog {
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
         contentPane.add(panel4, gbc);
-        buttonCancel = new JButton();
-        buttonCancel.setText("Cancel");
-        panel4.add(buttonCancel);
-        buttonAdd = new JButton();
-        buttonAdd.setText("Add");
-        panel4.add(buttonAdd);
+        cancelButton = new JButton();
+        cancelButton.setText("Cancel");
+        panel4.add(cancelButton);
+        submitButton = new JButton();
+        submitButton.setText("Add");
+        panel4.add(submitButton);
         ButtonGroup buttonGroup;
         buttonGroup = new ButtonGroup();
         buttonGroup.add(fullTimeRadioButton);

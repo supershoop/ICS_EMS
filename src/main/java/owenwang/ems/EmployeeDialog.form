@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="ems.EmployeeDialog">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="owenwang.ems.EmployeeDialog">
   <grid id="cbd77" binding="contentPane" layout-manager="GridBagLayout">
     <constraints>
       <xy x="48" y="54" width="542" height="551"/>
@@ -85,7 +85,7 @@
                 </constraints>
                 <properties>
                   <selected value="true"/>
-                  <text value="Full Time"/>
+                  <text value="Full-time"/>
                 </properties>
               </component>
               <component id="af0dc" class="javax.swing.JRadioButton" binding="partTimeRadioButton" default-binding="true">
@@ -94,7 +94,7 @@
                   <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
                 </constraints>
                 <properties>
-                  <text value="Part Time"/>
+                  <text value="Part-time"/>
                 </properties>
               </component>
               <component id="70975" class="javax.swing.JLabel">
@@ -202,7 +202,7 @@
                   <card name="FTE"/>
                 </constraints>
                 <properties/>
-                <border type="none" title="Full Time Employee"/>
+                <border type="none" title="Full-Time Employee"/>
                 <children>
                   <component id="b101a" class="javax.swing.JLabel">
                     <constraints>
@@ -265,7 +265,7 @@
                   <card name="PTE"/>
                 </constraints>
                 <properties/>
-                <border type="none" title="Part Time Employee"/>
+                <border type="none" title="Part-Time Employee"/>
                 <children>
                   <component id="20c13" class="javax.swing.JLabel">
                     <constraints>
@@ -381,13 +381,13 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="d9ae" class="javax.swing.JButton" binding="buttonCancel">
+          <component id="d9ae" class="javax.swing.JButton" binding="cancelButton">
             <constraints/>
             <properties>
               <text value="Cancel"/>
             </properties>
           </component>
-          <component id="4fc8" class="javax.swing.JButton" binding="buttonAdd">
+          <component id="4fc8" class="javax.swing.JButton" binding="submitButton">
             <constraints/>
             <properties>
               <text value="Add"/>

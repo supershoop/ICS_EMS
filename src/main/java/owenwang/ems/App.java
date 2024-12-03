@@ -1,30 +1,75 @@
-package ems;
+package owenwang.ems;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
+import java.util.prefs.Preferences;
 
 public class App extends JFrame {
+    public static final Preferences PREFS = Preferences.userNodeForPackage(App.class);
     private final MyHashTable data = new MyHashTable(32);
     private final List<Integer> ids = new ArrayList<>();
     private final EmployeeTableModel model = new EmployeeTableModel(data, ids);
+    private Path file = null;
+    private boolean unsavedChanges = false;
 
     public App() {
         add(panel1);
         addEmployeeButton.addActionListener((e) -> this.addEmployeeButtonClick());
+        saveAsButton.addActionListener(e -> this.saveAs());
+        saveButton.addActionListener(e -> this.save());
+        openButton.addActionListener(e -> this.open());
         table.setModel(model);
         table.setAutoCreateRowSorter(true);
         table.getRowSorter().setSortKeys(List.of(new RowSorter.SortKey(0, SortOrder.ASCENDING)));
         table.setDefaultRenderer(Double.class, new MoneyRenderer());
         table.getSelectionModel().addListSelectionListener(x -> onTableSelectionChanged());
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE) deleteEmployee();
+            }
+        });
         removeButton.addActionListener(e -> deleteEmployee());
         editButton.addActionListener(e -> editEmployee());
+        updateTitle();
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                onWindowClose();
+            }
+        });
+        defaultOpen();
+        updateTitle();
+        initializeToolbar();
+        splitPane.setDividerLocation(PREFS.getInt("dividerLocation", splitPane.getDividerLocation()));
+    }
+
+    public void defaultOpen() {
+        var lastOpenFile = PREFS.get("file", "");
+        if (!lastOpenFile.isEmpty()) {
+            openFrom(Path.of(lastOpenFile), true);
+        }
+    }
+
+    private void updateTitle() {
+        String fileName = file != null ? file.getFileName().toString() : "Untitled";
+        setTitle(String.format("%s%s - EMS", fileName, unsavedChanges ? "*" : ""));
     }
 
     private void deleteEmployee() {
@@ -32,6 +77,8 @@ public class App extends JFrame {
         data.removeFromTable(model.employeeAtIndex(row).empNum);
         ids.remove(row);
         model.fireTableRowsDeleted(row, row);
+        unsavedChanges = true;
+        updateTitle();
     }
 
     private void onTableSelectionChanged() {
@@ -86,14 +133,17 @@ public class App extends JFrame {
             Collections.sort(ids);
             int row = ids.indexOf(employee);
             model.fireTableRowsInserted(row, row);
+            unsavedChanges = true;
+            updateTitle();
         }
     }
 
     public void editEmployee() {
         var modification = EmployeeDialog.modifyEmployeeDialog(data, ids.get(table.getSelectedRow()));
+        if (!modification.wasChanged) return;
         int oldRow = ids.indexOf(modification.oldNumber);
         if (modification.oldNumber != modification.newNumber) {
-            ids.remove(Integer.valueOf(modification.newNumber));
+            ids.remove(oldRow);
             ids.add(modification.newNumber);
             Collections.sort(ids);
         }
@@ -104,7 +154,97 @@ public class App extends JFrame {
             model.fireTableRowsDeleted(oldRow, oldRow);
             model.fireTableRowsInserted(newRow, newRow);
         }
+        table.getSelectionModel().setSelectionInterval(newRow, newRow);
         onTableSelectionChanged(); // refresh the details pane
+        unsavedChanges = true;
+        updateTitle();
+    }
+
+    private void initializeToolbar() {
+        saveButton.setEnabled(file != null);
+    }
+
+    private boolean saveTo(Path path) {
+        try (var writer = Files.newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            TSV.serialize(data, writer);
+            unsavedChanges = false;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Writing file failed with error: " + e.getMessage(),
+                    "Error writing file",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return false;
+        }
+        file = path;
+        updateTitle();
+        return true;
+    }
+
+    private JFileChooser createFileChooser() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileFilter(new FileNameExtensionFilter("EMS Files (*.ems)", "ems"));
+        chooser.setCurrentDirectory(new File(PREFS.get("fileChooserDirectory",
+                chooser.getCurrentDirectory().toString())));
+        chooser.setAcceptAllFileFilterUsed(true);
+        return chooser;
+    }
+
+    public boolean saveAs() {
+        JFileChooser chooser = createFileChooser();
+        var status = chooser.showSaveDialog(this);
+        if (status == JFileChooser.APPROVE_OPTION) {
+            Path path = chooser.getSelectedFile().toPath();
+            if (chooser.getFileFilter() instanceof FileNameExtensionFilter) {
+                path = path.getParent().resolve(path.getFileName() + "." +
+                        ((FileNameExtensionFilter) chooser.getFileFilter()).getExtensions()[0]);
+            }
+            PREFS.put("fileChooserDirectory", path.toAbsolutePath().toString());
+            return saveTo(path);
+        }
+        return false;
+    }
+
+    public boolean save() {
+        return file != null && saveTo(file);
+    }
+
+    private boolean openFrom(Path path) {
+        return openFrom(path, false);
+    }
+
+    private boolean openFrom(Path path, boolean silent) {
+        data.clear();
+        ids.clear();
+        try {
+            ids.addAll(TSV.deserialize(Files.newBufferedReader(path), data));
+            unsavedChanges = false;
+        } catch (IOException | RuntimeException e) {
+            if (silent) return false;
+            JOptionPane.showMessageDialog(this,
+                    "Reading file failed with error: " + e.getMessage(),
+                    "Error reading file",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return false;
+        }
+        file = path;
+        Collections.sort(ids);
+        model.fireTableDataChanged();
+        updateTitle();
+        initializeToolbar();
+        return true;
+    }
+
+    public void open() {
+        if (!confirmUnsaved()) return;
+        JFileChooser chooser = createFileChooser();
+        var status = chooser.showOpenDialog(this);
+        if (status == JFileChooser.APPROVE_OPTION) {
+            var path = chooser.getSelectedFile().toPath();
+            openFrom(path);
+            PREFS.put("fileChooserDirectory", path.toAbsolutePath().toString());
+        }
     }
 
     private JPanel panel1;
@@ -131,6 +271,10 @@ public class App extends JFrame {
     private JLabel typeField;
     private JLabel hoursPerWeekField;
     private JLabel weeksPerYearField;
+    private JButton saveButton;
+    private JButton openButton;
+    private JButton saveAsButton;
+    private JSplitPane splitPane;
 
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
@@ -149,7 +293,8 @@ public class App extends JFrame {
     private void $$$setupUI$$$() {
         panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
-        final JSplitPane splitPane1 = new JSplitPane();
+        splitPane = new JSplitPane();
+        splitPane.setResizeWeight(1.0);
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -157,10 +302,10 @@ public class App extends JFrame {
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        panel1.add(splitPane1, gbc);
+        panel1.add(splitPane, gbc);
         detailsPane = new JPanel();
         detailsPane.setLayout(new CardLayout(0, 0));
-        splitPane1.setRightComponent(detailsPane);
+        splitPane.setRightComponent(detailsPane);
         final JLabel label1 = new JLabel();
         label1.setHorizontalAlignment(0);
         label1.setHorizontalTextPosition(11);
@@ -190,11 +335,14 @@ public class App extends JFrame {
         panel2.add(panel3, gbc);
         panel3.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, this.$$$getFont$$$(null, Font.BOLD, -1, panel3.getFont()), null));
         final JLabel label2 = new JLabel();
+        Font label2Font = this.$$$getFont$$$(null, Font.BOLD, -1, label2.getFont());
+        if (label2Font != null) label2.setFont(label2Font);
         label2.setText("First Name");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 0, 10, 0);
         panel3.add(label2, gbc);
         fNameField = new JLabel();
         fNameField.setText("Label");
@@ -203,14 +351,17 @@ public class App extends JFrame {
         gbc.gridy = 0;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
+        gbc.insets = new Insets(5, 0, 10, 0);
         panel3.add(fNameField, gbc);
         final JLabel label3 = new JLabel();
+        Font label3Font = this.$$$getFont$$$(null, Font.BOLD, -1, label3.getFont());
+        if (label3Font != null) label3.setFont(label3Font);
         label3.setText("Last Name");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel3.add(label3, gbc);
         lNameField = new JLabel();
         lNameField.setText("Label");
@@ -219,14 +370,17 @@ public class App extends JFrame {
         gbc.gridy = 1;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel3.add(lNameField, gbc);
         final JLabel label4 = new JLabel();
+        Font label4Font = this.$$$getFont$$$(null, Font.BOLD, -1, label4.getFont());
+        if (label4Font != null) label4.setFont(label4Font);
         label4.setText("Type");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(0, 0, 5, 0);
         panel3.add(label4, gbc);
         typeField = new JLabel();
         typeField.setText("Label");
@@ -235,14 +389,17 @@ public class App extends JFrame {
         gbc.gridy = 4;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
+        gbc.insets = new Insets(0, 0, 5, 0);
         panel3.add(typeField, gbc);
         final JLabel label5 = new JLabel();
+        Font label5Font = this.$$$getFont$$$(null, Font.BOLD, -1, label5.getFont());
+        if (label5Font != null) label5.setFont(label5Font);
         label5.setText("Gender");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel3.add(label5, gbc);
         genderField = new JLabel();
         genderField.setText("Label");
@@ -251,15 +408,17 @@ public class App extends JFrame {
         gbc.gridy = 2;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel3.add(genderField, gbc);
         final JLabel label6 = new JLabel();
+        Font label6Font = this.$$$getFont$$$(null, Font.BOLD, -1, label6.getFont());
+        if (label6Font != null) label6.setFont(label6Font);
         label6.setText("Work Location");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel3.add(label6, gbc);
         workLocationField = new JLabel();
         workLocationField.setText("Label");
@@ -268,7 +427,7 @@ public class App extends JFrame {
         gbc.gridy = 3;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel3.add(workLocationField, gbc);
         final JPanel spacer1 = new JPanel();
         gbc = new GridBagConstraints();
@@ -279,6 +438,7 @@ public class App extends JFrame {
         gbc.fill = GridBagConstraints.VERTICAL;
         panel2.add(spacer1, gbc);
         editButton = new JButton();
+        editButton.setIcon(new ImageIcon(getClass().getResource("/owenwang/ems/document-edit.png")));
         editButton.setText("Edit");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -288,6 +448,7 @@ public class App extends JFrame {
         gbc.insets = new Insets(5, 10, 5, 5);
         panel2.add(editButton, gbc);
         removeButton = new JButton();
+        removeButton.setIcon(new ImageIcon(getClass().getResource("/owenwang/ems/edit-delete.png")));
         removeButton.setText("Remove");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -315,6 +476,7 @@ public class App extends JFrame {
         FTEemployeeName = new JLabel();
         Font FTEemployeeNameFont = this.$$$getFont$$$(null, Font.BOLD, 16, FTEemployeeName.getFont());
         if (FTEemployeeNameFont != null) FTEemployeeName.setFont(FTEemployeeNameFont);
+        FTEemployeeName.setIcon(new ImageIcon(getClass().getResource("/owenwang/ems/im-user.png")));
         FTEemployeeName.setText("fName lName");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -351,12 +513,14 @@ public class App extends JFrame {
         gbc.insets = new Insets(5, 10, 0, 10);
         panel2.add(panel5, gbc);
         salaryLabel = new JLabel();
+        Font salaryLabelFont = this.$$$getFont$$$(null, Font.BOLD, -1, salaryLabel.getFont());
+        if (salaryLabelFont != null) salaryLabel.setFont(salaryLabelFont);
         salaryLabel.setText("Salary");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(5, 0, 10, 0);
         panel5.add(salaryLabel, gbc);
         salaryField = new JLabel();
         salaryField.setText("Label");
@@ -365,7 +529,7 @@ public class App extends JFrame {
         gbc.gridy = 0;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(5, 0, 10, 0);
         panel5.add(salaryField, gbc);
         deductionRateField = new JLabel();
         deductionRateField.setText("Label");
@@ -374,23 +538,27 @@ public class App extends JFrame {
         gbc.gridy = 4;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(deductionRateField, gbc);
         final JLabel label7 = new JLabel();
+        Font label7Font = this.$$$getFont$$$(null, Font.BOLD, -1, label7.getFont());
+        if (label7Font != null) label7.setFont(label7Font);
         label7.setText("Deduction Rate");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(label7, gbc);
         hourlyWageLabel = new JLabel();
+        Font hourlyWageLabelFont = this.$$$getFont$$$(null, Font.BOLD, -1, hourlyWageLabel.getFont());
+        if (hourlyWageLabelFont != null) hourlyWageLabel.setFont(hourlyWageLabelFont);
         hourlyWageLabel.setText("Hourly Wage");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(hourlyWageLabel, gbc);
         hourlyWageField = new JLabel();
         hourlyWageField.setText("Label");
@@ -399,15 +567,17 @@ public class App extends JFrame {
         gbc.gridy = 1;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(hourlyWageField, gbc);
         hoursPerWeekLabel = new JLabel();
+        Font hoursPerWeekLabelFont = this.$$$getFont$$$(null, Font.BOLD, -1, hoursPerWeekLabel.getFont());
+        if (hoursPerWeekLabelFont != null) hoursPerWeekLabel.setFont(hoursPerWeekLabelFont);
         hoursPerWeekLabel.setText("Hours per Week");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(hoursPerWeekLabel, gbc);
         hoursPerWeekField = new JLabel();
         hoursPerWeekField.setText("Label");
@@ -416,15 +586,17 @@ public class App extends JFrame {
         gbc.gridy = 2;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(hoursPerWeekField, gbc);
         weeksPerYearLabel = new JLabel();
+        Font weeksPerYearLabelFont = this.$$$getFont$$$(null, Font.BOLD, -1, weeksPerYearLabel.getFont());
+        if (weeksPerYearLabelFont != null) weeksPerYearLabel.setFont(weeksPerYearLabelFont);
         weeksPerYearLabel.setText("Weeks Per Year");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(weeksPerYearLabel, gbc);
         weeksPerYearField = new JLabel();
         weeksPerYearField.setText("Label");
@@ -433,7 +605,7 @@ public class App extends JFrame {
         gbc.gridy = 3;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(weeksPerYearField, gbc);
         grossIncomeField = new JLabel();
         grossIncomeField.setText("Label");
@@ -442,15 +614,17 @@ public class App extends JFrame {
         gbc.gridy = 5;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(grossIncomeField, gbc);
         final JLabel label8 = new JLabel();
+        Font label8Font = this.$$$getFont$$$(null, Font.BOLD, -1, label8.getFont());
+        if (label8Font != null) label8.setFont(label8Font);
         label8.setText("Gross Income");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(label8, gbc);
         netIncomeField = new JLabel();
         netIncomeField.setText("Label");
@@ -459,22 +633,25 @@ public class App extends JFrame {
         gbc.gridy = 6;
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(netIncomeField, gbc);
         final JLabel label9 = new JLabel();
+        Font label9Font = this.$$$getFont$$$(null, Font.BOLD, -1, label9.getFont());
+        if (label9Font != null) label9.setFont(label9Font);
         label9.setText("Net Income");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 6;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         panel5.add(label9, gbc);
         final JScrollPane scrollPane1 = new JScrollPane();
-        splitPane1.setLeftComponent(scrollPane1);
+        splitPane.setLeftComponent(scrollPane1);
         table = new JTable();
         table.setFillsViewportHeight(true);
         scrollPane1.setViewportView(table);
         final JToolBar toolBar1 = new JToolBar();
+        toolBar1.setBorderPainted(false);
         toolBar1.setFloatable(false);
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -483,8 +660,21 @@ public class App extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panel1.add(toolBar1, gbc);
         addEmployeeButton = new JButton();
+        addEmployeeButton.setIcon(new ImageIcon(getClass().getResource("/owenwang/ems/list-add-user.png")));
         addEmployeeButton.setText("Add Employee");
         toolBar1.add(addEmployeeButton);
+        saveButton = new JButton();
+        saveButton.setIcon(new ImageIcon(getClass().getResource("/owenwang/ems/document-save.png")));
+        saveButton.setText("Save");
+        toolBar1.add(saveButton);
+        saveAsButton = new JButton();
+        saveAsButton.setIcon(new ImageIcon(getClass().getResource("/owenwang/ems/document-save-as.png")));
+        saveAsButton.setText("Save As...");
+        toolBar1.add(saveAsButton);
+        openButton = new JButton();
+        openButton.setIcon(new ImageIcon(getClass().getResource("/owenwang/ems/document-open.png")));
+        openButton.setText("Open...");
+        toolBar1.add(openButton);
     }
 
     /**
@@ -516,4 +706,33 @@ public class App extends JFrame {
         return panel1;
     }
 
+    private boolean confirmUnsaved() {
+        if (unsavedChanges) {
+            int result = JOptionPane.showConfirmDialog(this,
+                    "The EMS has been modified. Do you want to save changes?",
+                    "Unsaved Changes",
+                    JOptionPane.YES_NO_CANCEL_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                if (file != null) {
+                    return save();
+                } else {
+                    return saveAs();
+                }
+            } else return result != JOptionPane.CANCEL_OPTION;
+        }
+        return true;
+    }
+
+    private void onWindowClose() {
+        if (confirmUnsaved()) {
+            if (getExtendedState() != MAXIMIZED_BOTH) {
+                PREFS.putInt("windowWidth", getWidth());
+                PREFS.putInt("windowHeight", getHeight());
+            }
+            PREFS.putInt("windowExtendedState", getExtendedState());
+            PREFS.putInt("dividerLocation", splitPane.getDividerLocation());
+            dispose();
+            if (file != null) PREFS.put("file", file.toAbsolutePath().toString());
+        }
+    }
 }

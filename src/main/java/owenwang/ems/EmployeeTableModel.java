@@ -1,11 +1,6 @@
-package ems;
+package owenwang.ems;
 
-import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.text.NumberFormatter;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.List;
 
 public class EmployeeTableModel extends AbstractTableModel {

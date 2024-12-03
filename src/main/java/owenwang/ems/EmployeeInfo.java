@@ -1,4 +1,4 @@
-package ems;
+package owenwang.ems;
 
 public abstract class EmployeeInfo {
     public static final class Gender {

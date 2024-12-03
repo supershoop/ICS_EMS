@@ -1,6 +1,6 @@
-package ems.input;
+package owenwang.ems.input;
 
-import ems.Constants;
+import owenwang.ems.Constants;
 
 import javax.swing.*;
 

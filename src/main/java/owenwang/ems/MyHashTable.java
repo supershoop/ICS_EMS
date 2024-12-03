@@ -1,5 +1,6 @@
-package ems;
+package owenwang.ems;
 import java.util.*;
+import java.util.function.Consumer;
 
 // Author: 752381@pdsb.net
 public class MyHashTable {
@@ -98,5 +99,18 @@ public class MyHashTable {
 
 	} // end displayTable
 
+	public void forEach(Consumer<EmployeeInfo> f) {
+		for (var bucket : buckets) {
+			for (EmployeeInfo e : bucket) {
+				f.accept(e);
+			}
+		}
+	}
 
+	public void clear() {
+		length = 0;
+		for (var bucket : buckets) {
+			bucket.clear();
+		}
+	}
 }

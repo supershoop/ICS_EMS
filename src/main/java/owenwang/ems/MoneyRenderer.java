@@ -1,8 +1,6 @@
-package ems;
+package owenwang.ems;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 public class MoneyRenderer extends DefaultTableCellRenderer {
     public MoneyRenderer() {
