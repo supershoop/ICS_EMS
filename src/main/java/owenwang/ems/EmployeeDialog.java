@@ -7,9 +7,6 @@ import java.awt.event.*;
 import java.util.Optional;
 
 public class EmployeeDialog extends JDialog {
-    private final int employee; // Create new if -1, else modify existing
-    private int newEmployee = -1; // The id of the newly-created employee, or the id to move an existing employee to
-    // if editing an employee, employee will contain the old id while newEmployee will contain the new one
 
     private JPanel contentPane;
     private JButton submitButton;
@@ -34,37 +31,32 @@ public class EmployeeDialog extends JDialog {
     private JSpinner deductionRatePTE;
     private JRadioButton preferNotToSayGenderOption;
 
-    public static class EmployeeModification {
-        public int oldNumber;
-        public int newNumber;
-        public boolean wasChanged;
-    }
+    private final int initialId; // The id of the employee to edit, or -1 to create new
+    private int finalId; // -1 if the change was cancelled
 
     private final MyHashTable data;
 
-    public static int newEmployeeDialog(MyHashTable data) {
-        var d = new EmployeeDialog(data, -1);
+    public static int newEmployeeDialog(JFrame parent, MyHashTable data) {
+        var d = new EmployeeDialog(parent, data, -1);
         d.setVisible(true);
-        return d.newEmployee;
+        return d.finalId;
     }
 
-    public static EmployeeModification modifyEmployeeDialog(MyHashTable data, int employee) {
-        var d = new EmployeeDialog(data, employee);
+    // Returns -1 if no change, else returns the id of the employee after the change
+    public static int modifyEmployeeDialog(JFrame parent, MyHashTable data, int employee) {
+        var d = new EmployeeDialog(parent, data, employee);
         d.setVisible(true);
-        var modification = new EmployeeModification();
-        modification.oldNumber = d.employee;
-        modification.newNumber = d.newEmployee == -1 ? d.employee : d.newEmployee;
-        modification.wasChanged = d.newEmployee != -1;
-        return modification;
+        return d.finalId;
     }
 
-    private EmployeeDialog(MyHashTable data, int employee) {
+    private EmployeeDialog(JFrame parent, MyHashTable data, int employee) {
+        super(parent, true);
+        // this.suggestedId = suggestedId;
         this.data = data;
-        this.employee = employee;
-        setTitle(this.employee == -1 ? "New Employee" : "Edit Employee");
+        this.initialId = employee;
+        setTitle(this.initialId == -1 ? "New Employee" : "Edit Employee");
         $$$setupUI$$$();
         setContentPane(contentPane);
-        setModal(true);
         getRootPane().setDefaultButton(submitButton);
         setMinimumSize(getRootPane().getMinimumSize());
         setResizable(false);
@@ -73,7 +65,7 @@ public class EmployeeDialog extends JDialog {
 
         submitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onOK();
+                onSubmit();
             }
         });
 
@@ -124,42 +116,27 @@ public class EmployeeDialog extends JDialog {
         initializeForm();
     }
 
-    private void onOK() {
+    private void onSubmit() {
         // add your code here
-        Optional<Integer> employeeNumber = Util.toInt(employeeNumberField.getText());
-        if (employeeNumberField.getText().isBlank()) {
-            errorMessageLabel.setText("Enter an employee number");
-        } else if (employeeNumber.isEmpty()) {
-            errorMessageLabel.setText("Employee number must be an integer");
-        } else if (employeeNumber.get().compareTo(0) < 0) {
-            errorMessageLabel.setText("Employee number must not be negative");
-        } else if (!employeeNumber.get().equals(employee) && data.getFromTable(employeeNumber.get()) != null) {
-            errorMessageLabel.setText("Employee ID already in use");
-        } else if (fNameField.getText().isBlank()) {
-            errorMessageLabel.setText("Enter a first name");
-        } else if (lNameField.getText().isBlank()) {
-            errorMessageLabel.setText("Enter a last name");
-       /* } else if (otherGenderOption.isSelected() && otherGenderField.getText().isBlank()) {
-            errorMessageLabel.setText("Gender must not be blank");*/
-        } else {
-            errorMessageLabel.setText("");
 
-            EmployeeInfo emp = createEmployee(employeeNumber.get());
+        errorMessageLabel.setText("");
 
-            if (employee != -1) data.removeFromTable(employee);
+        EmployeeInfo emp = buildEmployee();
+        if (emp != null) {
+            if (initialId != -1) data.removeFromTable(initialId);
             data.addToTable(emp);
-            newEmployee = emp.getEmpNum();
+            finalId = emp.getEmpNum();
             dispose();
         }
     }
 
     private void initializeForm() {
-        boolean emptyForm = employee == -1;
-        EmployeeInfo e = emptyForm ? null : data.getFromTable(employee);
+        boolean emptyForm = initialId == -1;
+        EmployeeInfo e = emptyForm ? null : data.getFromTable(initialId);
         employeeNumberField.setText(emptyForm ? "" : Integer.toString(e.getEmpNum()));
         fNameField.setText(emptyForm ? "" : e.getFirstName());
         lNameField.setText(emptyForm ? "" : e.getLastName());
-        workLocationBox.setSelectedIndex(emptyForm ? 0 : e.getWorkLocation());
+        workLocationBox.setSelectedIndex(emptyForm ? 0 : e.getWorkLoc());
         if (!emptyForm) {
             switch (e.getGender()) {
                 case EmployeeInfo.Gender.MALE:
@@ -191,48 +168,69 @@ public class EmployeeDialog extends JDialog {
             hoursPerWeekField.setValue(((PTE) e).getHoursPerWeek());
             weeksPerYearField.setValue(((PTE) e).getWeeksPerYear());
         }
-        submitButton.setText(employee == -1 ? "Add" : "Save");
+        submitButton.setText(initialId == -1 ? "Add" : "Save");
     }
 
-    private EmployeeInfo createEmployee(int employeeNumber) {
-        EmployeeInfo emp;
-        int gender = (maleGenderOption.isSelected() ? EmployeeInfo.Gender.MALE : femaleGenderOption.isSelected() ?
-                EmployeeInfo.Gender.FEMALE : otherGenderOption.isSelected() ?
-                EmployeeInfo.Gender.OTHER : EmployeeInfo.Gender.PREFER_NOT_TO_SAY);
-        if (partTimeRadioButton.isSelected()) {
-            emp = new PTE(employeeNumber,
-                    fNameField.getText().strip(),
-                    lNameField.getText().strip(),
-                    gender,
-                    workLocationBox.getSelectedIndex(),
-                    (Double) deductionRatePTE.getValue() / 100d,
-                    (Double) hourlyWageField.getValue(),
-                    (Double) hoursPerWeekField.getValue(),
-                    (Double) weeksPerYearField.getValue()
-            );
+    @SuppressWarnings("ExtractMethodRecommender")
+    private EmployeeInfo buildEmployee() {
+        Optional<Integer> employeeNumber = Util.toInt(employeeNumberField.getText());
+        if (employeeNumberField.getText().isBlank()) {
+            errorMessageLabel.setText("Enter an employee number");
+            return null;
+        } else if (employeeNumber.isEmpty()) {
+            errorMessageLabel.setText("Employee number must be an integer");
+            return null;
+        } else if (employeeNumber.get().compareTo(0) < 0) {
+            errorMessageLabel.setText("Employee number must not be negative");
+            return null;
+        } else if (!employeeNumber.get().equals(initialId) && data.getFromTable(employeeNumber.get()) != null) {
+                errorMessageLabel.setText("Employee ID already in use");
+            return null;
+        } else if (fNameField.getText().isBlank()) {
+            errorMessageLabel.setText("Enter a first name");
+            return null;
+        } else if (lNameField.getText().isBlank()) {
+            errorMessageLabel.setText("Enter a last name");
+            return null;
         } else {
-            emp = new FTE(employeeNumber,
-                    fNameField.getText().strip(),
-                    lNameField.getText().strip(),
-                    gender,
-                    workLocationBox.getSelectedIndex(),
-                    (Double) deductionRateFTE.getValue() / 100d,
-                    (Double) salaryField.getValue()
-            );
+            // No errors
+            EmployeeInfo emp;
+            final int gender;
+            if (maleGenderOption.isSelected()) gender = EmployeeInfo.Gender.MALE;
+            else if (femaleGenderOption.isSelected()) gender = EmployeeInfo.Gender.FEMALE;
+            else if (otherGenderOption.isSelected()) gender = EmployeeInfo.Gender.OTHER;
+            else if (preferNotToSayGenderOption.isSelected()) gender = EmployeeInfo.Gender.PREFER_NOT_TO_SAY;
+            else gender = 0;
+
+            if (partTimeRadioButton.isSelected()) {
+                emp = new PTE(employeeNumber.get(),
+                        fNameField.getText().strip(),
+                        lNameField.getText().strip(),
+                        gender,
+                        workLocationBox.getSelectedIndex(),
+                        (Double) deductionRatePTE.getValue() / 100d,
+                        (Double) hourlyWageField.getValue(),
+                        (Double) hoursPerWeekField.getValue(),
+                        (Double) weeksPerYearField.getValue()
+                );
+            } else {
+                emp = new FTE(employeeNumber.get(),
+                        fNameField.getText().strip(),
+                        lNameField.getText().strip(),
+                        gender,
+                        workLocationBox.getSelectedIndex(),
+                        (Double) deductionRateFTE.getValue() / 100d,
+                        (Double) salaryField.getValue()
+                );
+            }
+            return emp;
         }
-        return emp;
     }
 
     private void onCancel() {
         // add your code here if necessary
+        finalId = -1;
         dispose();
-    }
-
-    public static void main(String[] args) {
-        EmployeeDialog dialog = new EmployeeDialog(null, -1);
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
     }
 
     /**
@@ -399,7 +397,7 @@ public class EmployeeDialog extends JDialog {
         final JLabel label6 = new JLabel();
         label6.setHorizontalAlignment(10);
         label6.setHorizontalTextPosition(11);
-        label6.setText("Work Location");
+        label6.setText("Work Location:");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 7;

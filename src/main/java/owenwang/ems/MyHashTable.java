@@ -46,7 +46,7 @@ public class MyHashTable {
 			return; // Nothing to do!
 		}
 
-		buckets[calcBucket(employee.empNum)].add(employee);
+		buckets[calcBucket(employee.getEmpNum())].add(employee);
 		length++;
 
 	}  // end addToTable
@@ -61,7 +61,7 @@ public class MyHashTable {
 		ListIterator<EmployeeInfo> it = buckets[calcBucket(empNum)].listIterator();
 		while (it.hasNext()) {
 			EmployeeInfo e = it.next();
-			if (e.empNum == empNum) {
+			if (e.getEmpNum() == empNum) {
 				r = e;
 				it.remove();
 				length--;
@@ -75,7 +75,7 @@ public class MyHashTable {
 
 
 	public EmployeeInfo getFromTable(int empNum) {
-		return buckets[calcBucket(empNum)].stream().filter(e -> e.empNum == empNum).findAny().orElse(null);
+		return buckets[calcBucket(empNum)].stream().filter(e -> e.getEmpNum() == empNum).findAny().orElse(null);
 	}  // end getFromTable
 
 
@@ -92,7 +92,7 @@ public class MyHashTable {
 				System.out.printf("BUCKET %d has an ArrayList holding the following students:\n", i);
 				// Print out the first name of each student in the ArrayList for the current bucket.
 				for (EmployeeInfo e : buckets[i]) {
-					System.out.printf("\t%d\t%s %s\n", e.empNum, e.firstName, e.lastName);
+					System.out.printf("\t%d\t%s %s\n", e.getEmpNum(), e.getFirstName(), e.getLastName());
 				}
 			}
 		}

@@ -2,6 +2,13 @@ package owenwang.ems;
 
 import javax.swing.*;
 
+/**
+ * Employee Management System (EMS)
+ * ICS4U0-4
+ * 2024-12-10
+ * Requires Java 11 or higher
+ * @author Owen Wang <752381@pdsb.net>
+ */
 public class Main {
     public static void main(String[] args) throws UnsupportedLookAndFeelException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {

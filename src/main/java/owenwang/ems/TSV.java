@@ -11,19 +11,19 @@ public final class TSV {
     public static void serialize(MyHashTable data, Writer out) {
         data.forEach(e -> {
             try {
-                out.append(Integer.toString(e.empNum));
+                out.append(Integer.toString(e.getEmpNum()));
                 out.append('\t');
-                out.append(e.firstName);
+                out.append(e.getFirstName().replace("\t", ""));
                 out.append('\t');
-                out.append(e.lastName);
+                out.append(e.getLastName().replace("\t", ""));
                 out.append('\t');
-                out.append(Integer.toString(e.gender));
+                out.append(Integer.toString(e.getGender()));
                 out.append('\t');
-                out.append(Integer.toString(e.workLoc));
+                out.append(Integer.toString(e.getWorkLoc()));
                 out.append('\t');
-                out.append(Double.toString(e.deductRate));
+                out.append(Double.toString(e.getDeductRate()));
                 out.append('\t');
-                out.append(e instanceof FTE ? "FTE" : "PTE");
+                out.append(e instanceof FTE ? "FTE" : e instanceof PTE ? "PTE" : "");
                 out.append('\t');
                 if (e instanceof FTE) {
                     out.append(Double.toString(((FTE) e).getYearlySalary()));
@@ -42,9 +42,9 @@ public final class TSV {
         });
     }
 
-    public static List<Integer> deserialize(BufferedReader input, MyHashTable data) {
+    public static List<Integer> deserialize(MyHashTable data, BufferedReader in) {
         ArrayList<Integer> ids = new ArrayList<>();
-        input.lines().forEach(line -> {
+        in.lines().forEach(line -> {
             try {
                 var fields = line.split("\t");
                 var empNum = Integer.parseInt(fields[0]);

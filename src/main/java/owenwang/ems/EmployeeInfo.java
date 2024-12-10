@@ -1,6 +1,9 @@
 package owenwang.ems;
 
 public abstract class EmployeeInfo {
+
+    public static final String[] GENDERS = { "Male", "Female", "Other", "Prefer not to say"};
+
     public static final class Gender {
         public static final int MALE = 0;
         public static final int FEMALE = 1;
@@ -10,23 +13,23 @@ public abstract class EmployeeInfo {
 
     
     // ATTRIBUTES
-    public int empNum;
-    public String firstName;
-    public String lastName;
-    public int gender; // encode e.g. 0 for M, 1 for F, etc.
-    public int workLoc; // encode e.g. 0 for Mississauga, etc.
-    public double deductRate; // e.g. 0.21 for 21%
+    private final int empNum;
+    private String firstName;
+    private String lastName;
+    private int gender; // encode e.g. 0 for M, 1 for F, etc.
+    private int workLoc; // encode e.g. 0 for Mississauga, etc.
+    private double deductRate; // e.g. 0.21 for 21%
     
     
     // CONSTRUCTORS
     
     public EmployeeInfo(int eN, String fN, String lN, int g, int wL, double dR) {
     	empNum = eN;
-    	firstName = fN;
-    	lastName = lN;
-    	gender = g;
-    	workLoc = wL;
-    	deductRate = dR;
+    	setFirstName(fN);
+    	setLastName(lN);
+    	setGender(g);
+    	setWorkLoc(wL);
+    	setDeductRate(dR);
     }
     
     
@@ -40,8 +43,28 @@ public abstract class EmployeeInfo {
         return gender;
     }
 
-    public int getWorkLocation() {
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setGender(int gender) {
+        this.gender = gender;
+    }
+
+    public int getWorkLoc() {
         return workLoc;
+    }
+
+    public void setWorkLoc(int workLoc) {
+        this.workLoc = workLoc;
+    }
+
+    public void setDeductRate(double deductRate) {
+        this.deductRate = deductRate;
     }
 
     public double getDeductRate() {
@@ -61,7 +84,7 @@ public abstract class EmployeeInfo {
     public abstract double calcGrossAnnualIncome();
 
     public double calcNetAnnualIncome() {
-        return calcGrossAnnualIncome() * (1d - deductRate);
+        return calcGrossAnnualIncome() * (1d - getDeductRate());
     }
     
 }

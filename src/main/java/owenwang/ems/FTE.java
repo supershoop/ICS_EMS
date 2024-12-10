@@ -17,7 +17,7 @@ public class FTE extends EmployeeInfo {
     /**
      *
      */
-    public double yearlySalary;
+    private double yearlySalary;
     
     /**
      *
@@ -34,9 +34,12 @@ public class FTE extends EmployeeInfo {
         
     }
     
-    
     public double getYearlySalary() {
         return yearlySalary;
+    }
+
+    public void setYearlySalary(double yearlySalary) {
+        this.yearlySalary = yearlySalary;
     }
 
     @Override

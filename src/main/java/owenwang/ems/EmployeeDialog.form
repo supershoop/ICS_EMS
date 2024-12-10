@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="owenwang.ems.EmployeeDialog">
   <grid id="cbd77" binding="contentPane" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="48" y="54" width="542" height="551"/>
+      <xy x="48" y="54" width="542" height="585"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -166,7 +166,7 @@
                 <properties>
                   <horizontalAlignment value="10"/>
                   <horizontalTextPosition value="11"/>
-                  <text value="Work Location"/>
+                  <text value="Work Location:"/>
                 </properties>
               </component>
               <component id="cb501" class="javax.swing.JComboBox" binding="workLocationBox">

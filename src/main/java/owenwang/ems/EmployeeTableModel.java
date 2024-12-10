@@ -29,9 +29,9 @@ public class EmployeeTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         EmployeeInfo e = employeeAtIndex(rowIndex);
         switch (columnIndex) {
-            case 0: return e.empNum;
-            case 1: return e.firstName;
-            case 2: return e.lastName;
+            case 0: return e.getEmpNum();
+            case 1: return e.getFirstName();
+            case 2: return e.getLastName();
             case 3: return e instanceof FTE ? "Full-time" : "Part-time";
             case 4: return e.calcGrossAnnualIncome();
             case 5: return e.calcNetAnnualIncome();
